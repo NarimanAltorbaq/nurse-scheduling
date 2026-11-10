@@ -1,0 +1,53 @@
+@page
+@model NurseSchedule.Pages.Admin.ShiftsModel
+@{
+    ViewData["Title"] = "إدارة الورديات";
+}
+
+<div dir="rtl">
+    <h1>أوقات الدوام</h1>
+
+    @if (TempData["Ok"] != null)
+    {
+        <div class="alert alert-success">@TempData["Ok"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <ul class="list-group mb-4" style="max-width:500px">
+        @foreach (var s in Model.Shifts)
+        {
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span><b>@s.Name</b> <span class="text-muted">@s.TimeText</span></span>
+                @if (s.IsCustom)
+                {
+                    <form method="post" asp-page-handler="Delete"
+                          onsubmit="return confirm('بيتحذف معها كل الدوامات المسجلة عليها. متأكد؟')">
+                        <input type="hidden" name="id" value="@s.Id" />
+                        <button class="btn btn-outline-danger btn-sm">حذف</button>
+                    </form>
+                }
+            </li>
+        }
+    </ul>
+
+    <h2>إضافة وقت دوام جديد</h2>
+    <form method="post" asp-page-handler="Add" class="row g-2" style="max-width:500px">
+        <div class="col-12">
+            <input name="Name" class="form-control" placeholder="اسم الوردية" required />
+        </div>
+        <div class="col-6">
+            <label class="form-label">من</label>
+            <input name="From" type="time" value="07:00" class="form-control" />
+        </div>
+        <div class="col-6">
+            <label class="form-label">إلى</label>
+            <input name="To" type="time" value="15:00" class="form-control" />
+        </div>
+        <div class="col-12">
+            <button class="btn btn-primary">إضافة</button>
+        </div>
+    </form>
+</div>

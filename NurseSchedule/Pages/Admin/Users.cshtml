@@ -1,0 +1,89 @@
+@page
+@model NurseSchedule.Pages.Admin.UsersModel
+@{
+    ViewData["Title"] = "إدارة المستخدمين";
+    var roleNames = new Dictionary<string, string>
+    {
+        ["Supervisor"] = "مسؤولة التمريض",
+        ["DepartmentHead"] = "مسؤول قسم",
+        ["Nurse"] = "ممرض/ة"
+    };
+}
+
+<div dir="rtl">
+    <h1>إدارة المستخدمين</h1>
+
+    @if (TempData["Ok"] != null)
+    {
+        <div class="alert alert-success">@TempData["Ok"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr><th>الاسم</th><th>الإيميل</th><th>الدور</th><th>القسم</th><th></th></tr>
+            </thead>
+            <tbody>
+            @foreach (var u in Model.Users)
+            {
+                <tr>
+                    <td>@u.FullName</td>
+                    <td>@u.Email</td>
+                    <td>@(roleNames.TryGetValue(u.Role, out var rn) ? rn : u.Role)</td>
+                    <td>@u.DeptName</td>
+                    <td>
+                        <form method="post" asp-page-handler="Delete"
+                              onsubmit="return confirm('متأكد من حذف هالمستخدم؟')">
+                            <input type="hidden" name="id" value="@u.Id" />
+                            <button class="btn btn-outline-danger btn-sm">حذف</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+
+    <h2 class="mt-4">إضافة مستخدم</h2>
+
+    <form method="post" asp-page-handler="Add" style="max-width:500px">
+        <div asp-validation-summary="All" class="text-danger"></div>
+
+        <div class="mb-3">
+            <label class="form-label">الاسم الكامل</label>
+            <input asp-for="Input.FullName" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">الإيميل (بيستخدمه لتسجيل الدخول)</label>
+            <input asp-for="Input.Email" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">كلمة المرور</label>
+            <input asp-for="Input.Password" type="password" class="form-control" />
+            <div class="form-text">6 أحرف على الأقل، فيها حرف كبير وصغير ورقم ورمز.</div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">الدور</label>
+            <select asp-for="Input.Role" class="form-select">
+                <option value="Nurse">ممرض/ة</option>
+                <option value="DepartmentHead">مسؤول قسم</option>
+                <option value="Supervisor">مسؤولة التمريض</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">القسم</label>
+            <select asp-for="Input.DepartmentId" class="form-select">
+                <option value="">(بدون قسم)</option>
+                @foreach (var d in Model.Departments)
+                {
+                    <option value="@d.Id">@d.Code – @d.NameAr</option>
+                }
+            </select>
+        </div>
+        <button class="btn btn-primary">إضافة</button>
+    </form>
+</div>
