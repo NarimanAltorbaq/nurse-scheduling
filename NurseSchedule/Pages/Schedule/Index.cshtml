@@ -1,0 +1,115 @@
+@page
+@model NurseSchedule.Pages.Schedule.IndexModel
+@{
+    ViewData["Title"] = "الجدول الأسبوعي";
+    var dayNames = new[] { "الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت" };
+    var wk = Model.WeekStart.ToString("yyyy-MM-dd");
+    var prev = Model.WeekStart.AddDays(-7).ToString("yyyy-MM-dd");
+    var next = Model.WeekStart.AddDays(7).ToString("yyyy-MM-dd");
+}
+
+<div dir="rtl">
+    <h1>الجدول الأسبوعي</h1>
+
+    @if (Model.Message != null)
+    {
+        <div class="alert alert-warning">@Model.Message</div>
+    }
+    else
+    {
+        <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
+            @if (Model.IsSupervisor)
+            {
+                <form method="get" class="d-inline">
+                    <input type="hidden" name="week" value="@wk" />
+                    <select name="dept" class="form-select" onchange="this.form.submit()">
+                        @foreach (var d in Model.Departments)
+                        {
+                            <option value="@d.Id" selected="@(d.Id == Model.Dept!.Id)">
+                                @d.Code – @d.NameAr
+                            </option>
+                        }
+                    </select>
+                </form>
+            }
+            else
+            {
+                <b>@Model.Dept!.Code – @Model.Dept.NameAr</b>
+            }
+
+            <a class="btn btn-outline-secondary btn-sm"
+               asp-page="Index" asp-route-dept="@Model.Dept!.Id" asp-route-week="@prev">◀ الأسبوع السابق</a>
+            <a class="btn btn-outline-secondary btn-sm"
+               asp-page="Index" asp-route-dept="@Model.Dept.Id" asp-route-week="@next">الأسبوع التالي ▶</a>
+            <span class="text-muted">
+                من @Model.Days[0].ToString("d/M") إلى @Model.Days[6].ToString("d/M")
+            </span>
+        </div>
+
+        <p class="text-muted small">
+            @foreach (var s in Model.Shifts)
+            {
+                <span class="me-3"><b>@s.Name</b>: @s.TimeText</span>
+            }
+        </p>
+
+        <div class="table-responsive">
+            <table class="table table-bordered text-center align-top">
+                <thead class="table-light">
+                    <tr>
+                        <th class="text-end">الاسم</th>
+                        @foreach (var d in Model.Days)
+                        {
+                            <th>@dayNames[(int)d.DayOfWeek]<br />@d.ToString("d/M")</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var u in Model.Rows)
+                {
+                    <tr>
+                        <td class="text-end text-nowrap">@u.FullName</td>
+                        @foreach (var d in Model.Days)
+                        {
+                            <td>
+                            @foreach (var s in Model.Shifts)
+                            {
+                                var on = Model.Selected.Contains((u.Id, d, s.Id));
+                                <form method="post" asp-page-handler="Toggle">
+                                    <input type="hidden" name="userId" value="@u.Id" />
+                                    <input type="hidden" name="date" value="@d.ToString("yyyy-MM-dd")" />
+                                    <input type="hidden" name="shiftId" value="@s.Id" />
+                                    <input type="hidden" name="dept" value="@Model.Dept.Id" />
+                                    <input type="hidden" name="week" value="@wk" />
+                                    <button class="btn btn-sm w-100 mb-1 @(on ? "btn-success" : "btn-outline-secondary")">
+                                        @s.Name
+                                    </button>
+                                </form>
+                            }
+                            </td>
+                        }
+                    </tr>
+                }
+                @if (Model.Rows.Count == 0)
+                {
+                    <tr><td colspan="8" class="text-muted">ما في موظفين بهالقسم بعد.</td></tr>
+                }
+
+                @if (Model.ShowCoverage)
+                {
+                    foreach (var s in Model.Shifts)
+                    {
+                        <tr class="table-secondary small">
+                            <td class="text-end">تغطية: @s.Name</td>
+                            @foreach (var d in Model.Days)
+                            {
+                                <td>@Model.AllMembers.Count(m => Model.Selected.Contains((m.Id, d, s.Id)))</td>
+                            }
+                        </tr>
+                    }
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
