@@ -17,6 +17,9 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.R
 
 builder.Services.AddRazorPages();
 
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<NurseSchedule.Data.AuditService>();
+
 var app = builder.Build();
 app.Use(async (ctx, next) =>
 {

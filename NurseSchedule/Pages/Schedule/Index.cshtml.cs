@@ -13,11 +13,13 @@ public class IndexModel : PageModel
 {
     private readonly ApplicationDbContext _db;
     private readonly UserManager<ApplicationUser> _um;
+    private readonly AuditService _audit;
 
-    public IndexModel(ApplicationDbContext db, UserManager<ApplicationUser> um)
+    public IndexModel(ApplicationDbContext db, UserManager<ApplicationUser> um, AuditService audit)
     {
         _db = db;
         _um = um;
+        _audit = audit;
     }
 
     public List<Department> Departments { get; set; } = new();
@@ -103,18 +105,30 @@ public class IndexModel : PageModel
             x.DepartmentId == target.DepartmentId && x.ShiftTypeId == shiftId);
         if (!allowed) return BadRequest();
 
+        var shift = await _db.ShiftTypes.FindAsync(shiftId);
+
         var existing = await _db.ShiftAssignments.FirstOrDefaultAsync(a =>
             a.UserId == userId && a.Date == d && a.ShiftTypeId == shiftId);
 
+        string action;
         if (existing != null)
+        {
             _db.ShiftAssignments.Remove(existing);
+            action = "إلغاء وردية";
+        }
         else
+        {
             _db.ShiftAssignments.Add(new ShiftAssignment
             {
                 UserId = userId, Date = d, ShiftTypeId = shiftId
             });
+            action = "إضافة وردية";
+        }
 
         await _db.SaveChangesAsync();
+        await _audit.LogAsync(action,
+            $"{shift?.Name} للموظف {target.FullName} بتاريخ {d:yyyy-MM-dd}");
+
         return RedirectToPage(new { dept, week });
     }
 

@@ -1,0 +1,31 @@
+@page
+@model NurseSchedule.Pages.Admin.AuditModel
+@{
+    ViewData["Title"] = "سجل التعديلات";
+}
+
+<h1 class="h3 mb-3">سجل التعديلات</h1>
+<p class="text-muted">آخر 200 عملية، الأحدث أولاً.</p>
+
+<div class="table-responsive">
+    <table class="table table-striped table-sm">
+        <thead>
+            <tr><th>الوقت</th><th>المستخدم</th><th>العملية</th><th>التفاصيل</th></tr>
+        </thead>
+        <tbody>
+        @foreach (var l in Model.Logs)
+        {
+            <tr>
+                <td class="text-nowrap">@l.TimeUtc.AddHours(3).ToString("yyyy-MM-dd HH:mm")</td>
+                <td>@l.ActorName</td>
+                <td>@l.Action</td>
+                <td>@l.Details</td>
+            </tr>
+        }
+        @if (Model.Logs.Count == 0)
+        {
+            <tr><td colspan="4" class="text-muted">ما في عمليات مسجلة بعد.</td></tr>
+        }
+        </tbody>
+    </table>
+</div>

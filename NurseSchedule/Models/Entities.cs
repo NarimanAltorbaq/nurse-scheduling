@@ -45,3 +45,11 @@ public class ShiftAssignment
     public int ShiftTypeId { get; set; }
     public ShiftType ShiftType { get; set; } = null!;
 }
+public class AuditLog
+{
+    public int Id { get; set; }
+    public DateTime TimeUtc { get; set; } = DateTime.UtcNow;
+    public string ActorName { get; set; } = "";
+    public string Action { get; set; } = "";
+    public string Details { get; set; } = "";
+}
