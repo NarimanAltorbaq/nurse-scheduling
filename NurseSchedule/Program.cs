@@ -18,6 +18,15 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.R
 builder.Services.AddRazorPages();
 
 var app = builder.Build();
+app.Use(async (ctx, next) =>
+{
+    if (ctx.Request.Path.StartsWithSegments("/Identity/Account/Register"))
+    {
+        ctx.Response.Redirect("/Identity/Account/Login");
+        return;
+    }
+    await next();
+});
 using (var scope = app.Services.CreateScope())
 {
     await DbInitializer.SeedAsync(scope.ServiceProvider, app.Configuration);

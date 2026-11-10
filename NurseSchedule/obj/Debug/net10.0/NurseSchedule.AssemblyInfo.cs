@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("NurseSchedule")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7a491f2442621d54a2fd6d897b5b88c96972fa26")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d8890f198b90f6e3c09d6bf8be1854a4a25498b0")]
 [assembly: System.Reflection.AssemblyProductAttribute("NurseSchedule")]
 [assembly: System.Reflection.AssemblyTitleAttribute("NurseSchedule")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
