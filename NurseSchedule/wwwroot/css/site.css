@@ -1,31 +1,35 @@
-html {
-  font-size: 14px;
+:root {
+  --brand: #0f766e;
+  --brand-dark: #0b5d57;
+  --bg: #f5f7fa;
 }
 
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
-}
+html { font-size: 15px; position: relative; min-height: 100%; }
 
 body {
+  background: var(--bg);
+  font-family: "Segoe UI", Tahoma, "Noto Sans Arabic", Arial, sans-serif;
   margin-bottom: 60px;
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+.app-nav { background: var(--brand); }
+.app-nav .nav-link { color: rgba(255,255,255,.85); }
+.app-nav .nav-link:hover { color: #fff; }
+
+.app-footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  border-top: 1px solid #d9e0e8;
+  background: #fff;
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+.btn-primary { background: var(--brand); border-color: var(--brand); }
+.btn-primary:hover { background: var(--brand-dark); border-color: var(--brand-dark); }
+
+table th, table td { vertical-align: middle; }
+
+@media print {
+  .app-nav, .app-footer, .no-print { display: none !important; }
+  body { background: #fff; }
 }
