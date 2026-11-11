@@ -14,11 +14,13 @@ public class UsersModel : PageModel
 {
     private readonly ApplicationDbContext _db;
     private readonly UserManager<ApplicationUser> _um;
+    private readonly AuditService _audit;
 
-    public UsersModel(ApplicationDbContext db, UserManager<ApplicationUser> um)
+    public UsersModel(ApplicationDbContext db, UserManager<ApplicationUser> um, AuditService audit)
     {
         _db = db;
         _um = um;
+        _audit = audit;
     }
 
     public record UserRow(string Id, string FullName, string Email, string Role, string DeptName);
@@ -72,6 +74,7 @@ public class UsersModel : PageModel
             if (result.Succeeded)
             {
                 await _um.AddToRoleAsync(user, Input.Role);
+                await _audit.LogAsync("إضافة مستخدم", $"{user.FullName} ({user.Email}) بدور {Input.Role}");
                 TempData["Ok"] = "تمت إضافة المستخدم";
                 return RedirectToPage();
             }
@@ -82,6 +85,35 @@ public class UsersModel : PageModel
 
         await LoadAsync();
         return Page();
+    }
+
+    public async Task<IActionResult> OnPostResetAsync(string id, string newPassword)
+    {
+        var user = await _um.FindByIdAsync(id);
+        if (user == null) return NotFound();
+
+        if (string.IsNullOrWhiteSpace(newPassword))
+        {
+            TempData["Error"] = "اكتب كلمة المرور الجديدة";
+            return RedirectToPage();
+        }
+
+        var token = await _um.GeneratePasswordResetTokenAsync(user);
+        var result = await _um.ResetPasswordAsync(user, token, newPassword);
+
+        if (result.Succeeded)
+        {
+            await _um.SetLockoutEndDateAsync(user, null);
+            await _um.ResetAccessFailedCountAsync(user);
+            await _audit.LogAsync("تغيير كلمة مرور", $"للمستخدم {user.FullName} ({user.Email})");
+            TempData["Ok"] = $"تم تغيير كلمة مرور {user.FullName}";
+        }
+        else
+        {
+            TempData["Error"] = string.Join(" | ", result.Errors.Select(e => e.Description));
+        }
+
+        return RedirectToPage();
     }
 
     public async Task<IActionResult> OnPostDeleteAsync(string id)
@@ -96,8 +128,10 @@ public class UsersModel : PageModel
         var user = await _um.FindByIdAsync(id);
         if (user == null) return NotFound();
 
+        var label = $"{user.FullName} ({user.Email})";
         await _db.ShiftAssignments.Where(a => a.UserId == id).ExecuteDeleteAsync();
         await _um.DeleteAsync(user);
+        await _audit.LogAsync("حذف مستخدم", label);
 
         TempData["Ok"] = "تم حذف المستخدم";
         return RedirectToPage();
